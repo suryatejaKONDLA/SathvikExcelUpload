@@ -15,4 +15,14 @@
 		<ServiceWorker Include="wwwroot\service-worker.published.js" />
 		<!--<ServiceWorker Include="wwwroot\service-worker.js" PublishedContent="wwwroot\service-worker.published.js" />-->
 	</ItemGroup>
+	<ItemGroup>
+		<Content Update="wwwroot\templatesJson\*.json">
+			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+		</Content>
+	</ItemGroup>
+	<ItemGroup>
+	  <Content Update="wwwroot\service-worker.published.js">
+	    <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	</ItemGroup>
 </Project>

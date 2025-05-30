@@ -9,26 +9,25 @@
         <div class="col-12">
             <MudButton Class="mb-2 me-2"
                        Color="Color.Info"
-                       OnClick="@(() => LoadExcelDataAsync("PAS_Standardization_Template"))"
+                       OnClick="@(() => LoadSheets("PAS_Standardization_Template"))"
                        Variant="Variant.Outlined">
                 PAS Standardization Template
             </MudButton>
             <MudButton Class="mb-2 me-2"
                        Color="Color.Info"
-                       OnClick="@(() => LoadExcelDataAsync("SUB_IV_PAS_Standardization_Template_STATION_1_2"))"
+                       OnClick="@(() => LoadSheets("SUB_IV_PAS_Standardization_Template_STATION_1_2"))"
                        Variant="Variant.Outlined">
                 SUB IV PAS Standardization Template (STATION 1&amp;2)
             </MudButton>
             <MudButton Class="mb-2"
                        Color="Color.Info"
-                       OnClick="@(() => LoadExcelDataAsync("SUB_IV_PAS_Standardization_Template_STATION_3_4"))"
+                       OnClick="@(() => LoadSheets("SUB_IV_PAS_Standardization_Template_STATION_3_4"))"
                        Variant="Variant.Outlined">
                 SUB IV PAS Standardization Template (STATION 3&amp;4)
             </MudButton>
         </div>
     </div>
 
-    <!-- Square box under buttons -->
     @{
         if (FilteredSheets.Any())
         {
@@ -36,7 +35,7 @@
                 <div class="col-12 d-flex justify-content-center">
                     <div style="border: 1px solid #ccc; padding: 16px; width: 100%; height: 100%; border-radius: 6px;">
                         <div class="col-12">
-                            <div class="row">
+                            <div class="row mb-5">
                                 <div class="d-flex flex-wrap gap-2">
                                     @{
                                         foreach (var sheet in FilteredSheets)
@@ -50,8 +49,45 @@
                                     }
                                 </div>
                             </div>
+                            <hr />
                             <div class="row">
+                                @{
+                                    if (DynamicTableData is not null && CurrentModelType is not null)
+                                    {
+                                        @if (DynamicTableData.Any())
+                                        {
+                                            <MudTable Items="@DynamicTableData" Bordered="true" FixedHeader="true">
+                                                <HeaderContent>
+                                                    @{
+                                                        foreach (var prop in CurrentModelType.GetProperties())
+                                                        {
+                                                            var attr = prop.GetCustomAttributes(typeof(JsonPropertyNameAttribute), false).FirstOrDefault() as JsonPropertyNameAttribute;
+                                                            var displayName = attr?.Name ?? prop.Name;
+                                                            <MudTh>@displayName</MudTh>
+                                                        }
+                                                    }
+                                                </HeaderContent>
+                                                <RowTemplate>
+                                                    @{
+                                                        foreach (var prop in CurrentModelType.GetProperties())
+                                                        {
+                                                            <MudTd>@(prop.GetValue(context))</MudTd>
+                                                        }
+                                                    }
+                                                </RowTemplate>
+                                            </MudTable>
+                                        }
+                                        else
+                                        {
+                                            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                                                <div class="spinner-grow text-primary" style="width: 6rem; height: 6rem;" role="status">
+                                                    <span class="visually-hidden">Loading...</span>
+                                                </div>
+                                            </div>
+                                        }
+                                    }
 
+                                }
                             </div>
                         </div>
                     </div>
@@ -65,42 +101,49 @@
     [Inject] IJSRuntime JsRuntime { get; set; }
     private string SelectedFileName = string.Empty;
     private string SelectedSheetName = string.Empty;
+    private IEnumerable<object> DynamicTableData;
+    private Type CurrentModelType;
 
     private List<string> FilteredSheets = [];
 
-    private static readonly List<string> DefaultsSheets =
-    [
-        "Analogs",
-        "Status",
-        "Controls"
-    ];
+    private readonly Dictionary<string, Type> SheetModelMap = new()
+    {
+        { "Analogs", typeof(PasStandardizationTemplateAnalogSheetModel) },
+        { "Status", typeof(PasStandardizationTemplateStatusSheetModel) },
+        { "Controls", typeof(PasStandardizationTemplateControlsSheetModel) }
+    };
 
-    private async Task LoadExcelDataAsync(string fileName)
+
+    private void LoadSheets(string fileName)
     {
         SelectedFileName = fileName;
         FilteredSheets = [];
-
-        var sheetNames = await JsRuntime.InvokeAsync<List<string>>("readExcelSheets", $"templates/{fileName}.xlsx");
-        FilteredSheets = sheetNames.Where(name => DefaultsSheets.Contains(name)).ToList();
+        FilteredSheets = SheetModelMap.Keys.ToList();
     }
 
     private async Task SelectSheetAsync(string sheetName)
     {
         SelectedSheetName = sheetName;
+        DynamicTableData = [];
+        CurrentModelType = null;
 
-        var forecasts = await Http.GetFromJsonAsync<List<PasStandardizationTemplateControlsSheetModel>>($"templatesJson/{SelectedFileName}_{SelectedSheetName}.json");
+        StateHasChanged();
 
+        if (!SheetModelMap.TryGetValue(sheetName, out var modelType))
+        {
+            return;
+        }
 
-        var json = await JsRuntime.InvokeAsync<string>("readExcelSheetData", $"templates/{SelectedFileName}.xlsx", SelectedSheetName);
-        var xx = json;
+        CurrentModelType = modelType;
 
-        await JsRuntime.InvokeVoidAsync(
-            "downloadJsonFile",
-            $"{SelectedFileName}_{SelectedSheetName}.json",
-            json
-        );
-        // var objects = System.Text.Json.JsonSerializer.Deserialize<List<PasStandardizationTemplateAnalogSheetModel>>(json);
-        // SheetJson = json;
+        var json = await JsRuntime.InvokeAsync<string>("readLocalJson", $"templatesJson/{SelectedFileName}_{SelectedSheetName}.json");
+
+        var listType = typeof(List<>).MakeGenericType(modelType);
+        var result = System.Text.Json.JsonSerializer.Deserialize(json, listType);
+
+        if (result is IEnumerable<object> list)
+        {
+            DynamicTableData = list;
+        }
     }
-
 }

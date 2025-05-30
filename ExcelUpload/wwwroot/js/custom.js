@@ -98,3 +98,12 @@ window.downloadJsonFile = function (fileName, jsonContent) {
 
     URL.revokeObjectURL(url);
 };
+
+window.readLocalJson = async function (path) {
+    const response = await fetch(path);
+    if (!response.ok) {
+        throw new Error(`Could not fetch ${path}: ${response.status}`);
+    }
+    return await response.text();
+};
+
