@@ -4,11 +4,11 @@
     {
         [JsonProperty("RTU")]
         [JsonPropertyName("RTU")]
-        public int Rtu { get; set; }
+        public int? Rtu { get; set; }
 
         [JsonProperty("TMS")]
         [JsonPropertyName("TMS")]
-        public int Tms { get; set; }
+        public int? Tms { get; set; }
 
         [JsonProperty("Description")]
         [JsonPropertyName("Description")]
@@ -56,7 +56,7 @@
 
         [JsonProperty("Resistor Size")]
         [JsonPropertyName("Resistor Size")]
-        public string ResistorSize { get; set; }
+        public object ResistorSize { get; set; }
 
         [JsonProperty("Xdcr. Type")]
         [JsonPropertyName("Xdcr. Type")]
@@ -79,11 +79,11 @@
 
         [JsonProperty("RTU")]
         [JsonPropertyName("RTU")]
-        public int Rtu { get; set; }
+        public int? Rtu { get; set; }
 
         [JsonProperty("TMS")]
         [JsonPropertyName("TMS")]
-        public int Tms { get; set; }
+        public int? Tms { get; set; }
 
         [JsonProperty("Description")]
         [JsonPropertyName("Description")]
@@ -101,8 +101,8 @@
         [JsonPropertyName("Status Description")]
         public string StatusDescription { get; set; }
 
-        [JsonProperty("TMS Invert (0/1  1/0) ")]
-        [JsonPropertyName("TMS Invert (0/1  1/0) ")]
+        [JsonProperty("TMS Invert (0/1  1/0)")]
+        [JsonPropertyName("TMS Invert (0/1  1/0)")]
         public string TmsInvert0110 { get; set; }
 
         [JsonProperty("Normal State")]
@@ -113,8 +113,8 @@
         [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software)")]
         public string TerminationPointTypeUtilizeForHardwareAndSoftware { get; set; }
 
-        [JsonProperty("Termination Point/Type (Utilize for Hardware and software)_1")]
-        [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software)_1")]
+        [JsonProperty("Termination Point/Type (Utilize for Hardware and software) 1")]
+        [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software) 1")]
         public string TerminationPointTypeUtilizeForHardwareAndSoftware1 { get; set; }
 
         [JsonProperty("Comments")]
@@ -124,6 +124,18 @@
 
     public class PasStandardizationTemplateControlsSheetModel
     {
+        [JsonProperty("RTU")]
+        [JsonPropertyName("RTU")]
+        public int? Rtu { get; set; }
+
+        [JsonProperty("TMS")]
+        [JsonPropertyName("TMS")]
+        public int? Tms { get; set; }
+
+        [JsonProperty("Description")]
+        [JsonPropertyName("Description")]
+        public string Description { get; set; }
+
         [JsonProperty("OSI Name")]
         [JsonPropertyName("OSI Name")]
         public string OsiName { get; set; }
@@ -136,12 +148,12 @@
         [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software)")]
         public string TerminationPointTypeUtilizeForHardwareAndSoftware { get; set; }
 
-        [JsonProperty("Termination Point/Type (Utilize for Hardware and software)_1")]
-        [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software)_1")]
+        [JsonProperty("Termination Point/Type (Utilize for Hardware and software) 1")]
+        [JsonPropertyName("Termination Point/Type (Utilize for Hardware and software) 1")]
         public string TerminationPointTypeUtilizeForHardwareAndSoftware1 { get; set; }
 
         [JsonProperty("Comments")]
         [JsonPropertyName("Comments")]
         public string Comments { get; set; }
     }
-    }
+}
